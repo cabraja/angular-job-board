@@ -1,3 +1,5 @@
+using API.Interfaces.Repos;
+using API.Repos;
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +11,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IEmployerRepo, EmployerRepo>();
 
 builder.Services.AddDbContext<ApiContext>(options => {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Dev"));
