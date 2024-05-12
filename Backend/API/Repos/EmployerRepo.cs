@@ -1,4 +1,4 @@
-﻿using API.Helpers;
+﻿using API.Helpers.QueryModels;
 using API.Interfaces.Repos;
 using DataAccess;
 using DataAccess.Models;
@@ -18,14 +18,14 @@ namespace API.Repos
 
         public async Task<List<Employer>> GetEmployersAsync(EmployerQueryModel queryModel)
         {
-            var employers = _context.Employers.AsQueryable();
+            var employers = _context.Employers.Include(x => x.Jobs).AsQueryable();
 
             if (!queryModel.Name.IsNullOrEmpty())
             {
                 employers = employers.Where(x => x.Name.Contains(queryModel.Name));
             }
 
-            return await employers.ToListAsync();
+            return await employers.Skip(queryModel.PerPage * (queryModel.Page-1)).Take(queryModel.PerPage).ToListAsync();
         }
     }
 }

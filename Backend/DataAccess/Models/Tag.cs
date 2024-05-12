@@ -13,7 +13,7 @@ namespace DataAccess.Models
             Info,
             Tech
         }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public TagType Type { get; set; }
         public IEnumerable<Job> Jobs { get; set; } = new List<Job>();
     }

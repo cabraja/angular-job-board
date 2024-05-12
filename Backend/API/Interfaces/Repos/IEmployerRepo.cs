@@ -1,4 +1,4 @@
-﻿using API.Helpers;
+﻿using API.Helpers.QueryModels;
 using DataAccess.Models;
 
 namespace API.Interfaces.Repos

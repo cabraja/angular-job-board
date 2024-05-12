@@ -139,7 +139,7 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.Models.Job", b =>
                 {
                     b.HasOne("DataAccess.Models.Employer", "Employer")
-                        .WithMany()
+                        .WithMany("Jobs")
                         .HasForeignKey("EmployerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -160,6 +160,11 @@ namespace DataAccess.Migrations
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Models.Employer", b =>
+                {
+                    b.Navigation("Jobs");
                 });
 #pragma warning restore 612, 618
         }

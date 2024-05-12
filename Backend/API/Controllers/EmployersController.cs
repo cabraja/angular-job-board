@@ -1,9 +1,7 @@
-﻿using API.Helpers;
+﻿using API.Helpers.QueryModels;
 using API.Interfaces.Repos;
 using DataAccess;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API.Controllers
 {
@@ -25,9 +23,16 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var employer = await _repo.GetEmployersAsync(queryModel);
+            try
+            {
+                var employers = await _repo.GetEmployersAsync(queryModel);
+                return Ok(employers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
 
-            return Ok(employer);
         }
 
         
