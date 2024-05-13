@@ -1,8 +1,12 @@
 ﻿using API.Helpers.DTO;
 using API.Helpers.Exceptions;
+using API.Helpers.QueryModels;
 using API.Interfaces.Repos;
 using DataAccess;
 using DataAccess.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Linq;
 
 namespace API.Repos
 {
@@ -13,6 +17,43 @@ namespace API.Repos
         public JobRepo(ApiContext context)
         {
             _context = context;
+        }
+
+        public async Task<List<JobDTO>> GetJobsAsync(JobQueryModal queryModal)
+        {
+            var jobs = _context.Jobs.Include(x => x.Employer).Include(x => x.Tags).AsQueryable();
+
+            if (!queryModal.Title.IsNullOrEmpty())
+            {
+                jobs = jobs.Where(x => x.Title.Contains(queryModal.Title));
+            }
+
+            if(queryModal.EmployerId != null)
+            {
+                jobs = jobs.Where(x => x.Employer.Id == queryModal.EmployerId);
+            }
+
+            if(!queryModal.TagIds.IsNullOrEmpty())
+            {
+                jobs = jobs.Where(x => x.Tags.Any(t => queryModal.TagIds.Contains(t.Id)));
+            }
+
+            return await jobs.Skip(queryModal.PerPage * (queryModal.Page - 1)).Take(queryModal.PerPage).Select(x => new JobDTO
+            {
+                Title = x.Title,
+                Description = x.Description,
+                Employer = new EmployerPartialDTO
+                {
+                    Name = x.Employer.Name,
+                    Id = x.Employer.Id,
+                },
+                Tags = x.Tags.Select(t => new TagPartialDTO 
+                { 
+                    Id = t.Id,
+                    Name = t.Name
+                }).ToList(),
+                
+            }).ToListAsync();
         }
 
         public async Task<JobDTO> CreateJob(AddJobDTO addJobDTO)

@@ -1,5 +1,6 @@
 ﻿using API.Helpers.DTO;
 using API.Helpers.Exceptions;
+using API.Helpers.QueryModels;
 using API.Interfaces.Repos;
 using API.Repos;
 using Microsoft.AspNetCore.Mvc;
@@ -21,9 +22,19 @@ namespace API.Controllers
 
         // GET: api/<JobsController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IActionResult> Get([FromQuery] JobQueryModal queryModal)
         {
-            return new string[] { "value1", "value2" };
+            if(!ModelState.IsValid) { return  BadRequest(); };
+
+            try
+            {
+                var jobs = await _repo.GetJobsAsync(queryModal);
+                return Ok(jobs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
 
         // GET api/<JobsController>/5
