@@ -14,6 +14,6 @@ namespace DataAccess.Models
         public string EmployeeCount { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;    
 
-        public IEnumerable<Job> Jobs { get; set; } = new List<Job>();
+        public List<Job> Jobs { get; set; } = new List<Job>();
     }
 }

@@ -4,6 +4,7 @@
     {
         public string? Title { get; set; } = string.Empty;
         public int? EmployerId { get; set; }
-        public IEnumerable<int> TagIds { get; set; } = new List<int>();
+
+        public string? TagIds { get; set; } = string.Empty;
     }
 }

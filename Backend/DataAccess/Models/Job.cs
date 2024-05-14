@@ -11,6 +11,6 @@ namespace DataAccess.Models
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public Employer Employer { get; set; }
-        public IEnumerable<Tag> Tags { get; set; } = new List<Tag>();
+        public List<Tag> Tags { get; set; } = new List<Tag>();
     }
 }

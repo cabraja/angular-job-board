@@ -35,7 +35,8 @@ namespace API.Repos
 
             if(!queryModal.TagIds.IsNullOrEmpty())
             {
-                jobs = jobs.Where(x => x.Tags.Any(t => queryModal.TagIds.Contains(t.Id)));
+                List<int> tagIds = queryModal.TagIds.Split(',').Select(int.Parse).ToList();
+                jobs = jobs.Where(x => x.Tags.Any(t => tagIds.Contains(t.Id)));
             }
 
             return await jobs.Skip(queryModal.PerPage * (queryModal.Page - 1)).Take(queryModal.PerPage).Select(x => new JobDTO
@@ -93,6 +94,45 @@ namespace API.Repos
                     Name = employer.Name
                 },
                 Tags = tags.Select(x => new TagPartialDTO { Id = x.Id, Name = x.Name }).ToList()
+            };
+        }
+
+        public async Task<JobDTO> UpdateJob(int jobId, EditJobDTO editJobDTO)
+        {
+            var job = await _context.Jobs.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == jobId);
+
+            if(job == null )
+            {
+                throw new EntityNotFoundException("This job does not exist.");
+            }
+
+            if (!editJobDTO.Title.IsNullOrEmpty())
+            {
+                job.Title = editJobDTO.Title;
+            }
+
+            if(!editJobDTO.Description.IsNullOrEmpty())
+            {
+                job.Description = editJobDTO.Description;
+            }
+
+            if(!editJobDTO.TagIds.IsNullOrEmpty())
+            {
+                var newTags = await _context.Tags.Where(x => editJobDTO.TagIds.Contains(x.Id)).ToListAsync();
+                job.Tags.Clear();
+                job.Tags = newTags;
+            }
+
+            await _context.SaveChangesAsync();
+            return new JobDTO
+            {
+                Title = job.Title,
+                Description = job.Description,
+                Tags = job.Tags.Select(t => new TagPartialDTO
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                })
             };
         }
     }

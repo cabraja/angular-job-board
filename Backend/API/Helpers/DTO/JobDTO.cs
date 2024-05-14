@@ -6,7 +6,7 @@ namespace API.Helpers.DTO
     {
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public EmployerPartialDTO Employer { get; set; }
+        public EmployerPartialDTO? Employer { get; set; }
         public IEnumerable<TagPartialDTO> Tags { get; set; } = new List<TagPartialDTO>();
     }
 

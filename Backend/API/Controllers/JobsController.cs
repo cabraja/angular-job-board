@@ -65,10 +65,25 @@ namespace API.Controllers
             }
         }
 
-        // PUT api/<JobsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // PATCH api/<JobsController>/5
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Patch(int id, [FromBody] EditJobDTO editJobDTO)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var updatedJob = await _repo.UpdateJob(id, editJobDTO);
+                return Ok(updatedJob);
+            }
+            catch(EntityNotFoundException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
 
         // DELETE api/<JobsController>/5
