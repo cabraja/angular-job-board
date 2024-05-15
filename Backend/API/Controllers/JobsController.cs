@@ -88,8 +88,23 @@ namespace API.Controllers
 
         // DELETE api/<JobsController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var deletedJob = await _repo.DeleteJob(id);
+                return Ok(deletedJob);
+            }
+            catch(EntityNotFoundException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
     }
 }

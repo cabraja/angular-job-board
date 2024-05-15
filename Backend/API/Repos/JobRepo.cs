@@ -99,7 +99,7 @@ namespace API.Repos
 
         public async Task<JobDTO> UpdateJob(int jobId, EditJobDTO editJobDTO)
         {
-            var job = await _context.Jobs.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == jobId);
+            var job = await _context.Jobs.Include(x => x.Tags).Include(x => x.Employer).FirstOrDefaultAsync(x => x.Id == jobId);
 
             if(job == null )
             {
@@ -128,6 +128,39 @@ namespace API.Repos
             {
                 Title = job.Title,
                 Description = job.Description,
+                Employer = new EmployerPartialDTO
+                {
+                    Id = job.Employer.Id,
+                    Name = job.Employer.Name,
+                },
+                Tags = job.Tags.Select(t => new TagPartialDTO
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                })
+            };
+        }
+
+        public async Task<JobDTO> DeleteJob(int jobId)
+        {
+            var job = await _context.Jobs.Include(x => x.Tags).Include(x => x.Employer).FirstOrDefaultAsync(x => x.Id == jobId);
+
+            if(job == null )
+            {
+                throw new EntityNotFoundException("Job does not exist.");
+            }
+
+            _context.Jobs.Remove(job);
+            await _context.SaveChangesAsync();
+            return new JobDTO
+            {
+                Title = job.Title,
+                Description = job.Description,
+                Employer = new EmployerPartialDTO
+                {
+                    Id = job.Employer.Id,
+                    Name = job.Employer.Name,
+                },
                 Tags = job.Tags.Select(t => new TagPartialDTO
                 {
                     Id = t.Id,
