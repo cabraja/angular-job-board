@@ -1,4 +1,5 @@
-﻿using API.Helpers.QueryModels;
+﻿using API.Helpers.Exceptions;
+using API.Helpers.QueryModels;
 using API.Interfaces.Repos;
 using DataAccess;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +36,26 @@ namespace API.Controllers
 
         }
 
-        
+        // GET: api/<EmployersController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var employer = await _repo.GetSingleEmployerAsync(id);
+                return Ok(employer);
+            }
+            catch(EntityNotFoundException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500);
+            }
+        }
+
     }
 }

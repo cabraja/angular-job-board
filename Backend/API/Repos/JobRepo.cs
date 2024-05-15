@@ -19,7 +19,7 @@ namespace API.Repos
             _context = context;
         }
 
-        public async Task<List<JobDTO>> GetJobsAsync(JobQueryModal queryModal)
+        public async Task<List<SmallJobDTO>> GetJobsAsync(JobQueryModal queryModal)
         {
             var jobs = _context.Jobs.Include(x => x.Employer).Include(x => x.Tags).AsQueryable();
 
@@ -39,10 +39,10 @@ namespace API.Repos
                 jobs = jobs.Where(x => x.Tags.Any(t => tagIds.Contains(t.Id)));
             }
 
-            return await jobs.Skip(queryModal.PerPage * (queryModal.Page - 1)).Take(queryModal.PerPage).Select(x => new JobDTO
+            return await jobs.Skip(queryModal.PerPage * (queryModal.Page - 1)).Take(queryModal.PerPage).Select(x => new SmallJobDTO
             {
+                Id = x.Id,
                 Title = x.Title,
-                Description = x.Description,
                 Employer = new EmployerPartialDTO
                 {
                     Name = x.Employer.Name,
@@ -55,6 +55,33 @@ namespace API.Repos
                 }).ToList(),
                 
             }).ToListAsync();
+        }
+
+        public async Task<JobDTO> GetSingleJobAsync(int jobId)
+        {
+            var job = await _context.Jobs.Include(x => x.Tags).Include(x => x.Employer).FirstOrDefaultAsync(x => x.Id == jobId);
+
+            if(job == null)
+            {
+                throw new EntityNotFoundException("Job does not exist");
+            }
+
+            return new JobDTO
+            {
+                Id = job.Id,
+                Title = job.Title,
+                Description = job.Description,
+                Employer = new EmployerPartialDTO
+                {
+                    Name = job.Employer.Name,
+                    Id = job.Employer.Id,
+                },
+                Tags = job.Tags.Select(t => new TagPartialDTO
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                }).ToList(),
+            };
         }
 
         public async Task<JobDTO> CreateJob(AddJobDTO addJobDTO)
@@ -86,6 +113,7 @@ namespace API.Repos
 
             return new JobDTO
             {
+                Id = newJob.Id,
                 Title = newJob.Title,
                 Description = newJob.Description,
                 Employer = new EmployerPartialDTO
@@ -126,6 +154,7 @@ namespace API.Repos
             await _context.SaveChangesAsync();
             return new JobDTO
             {
+                Id = job.Id,
                 Title = job.Title,
                 Description = job.Description,
                 Employer = new EmployerPartialDTO
@@ -154,6 +183,7 @@ namespace API.Repos
             await _context.SaveChangesAsync();
             return new JobDTO
             {
+                Id = job.Id,
                 Title = job.Title,
                 Description = job.Description,
                 Employer = new EmployerPartialDTO

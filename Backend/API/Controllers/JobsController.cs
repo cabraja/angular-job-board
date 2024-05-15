@@ -5,7 +5,6 @@ using API.Interfaces.Repos;
 using API.Repos;
 using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API.Controllers
 {
@@ -39,9 +38,23 @@ namespace API.Controllers
 
         // GET api/<JobsController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return "value";
+            if (!ModelState.IsValid) { return BadRequest(); };
+
+            try
+            {
+                var job = await _repo.GetSingleJobAsync(id);
+                return Ok(job);
+            }
+            catch (EntityNotFoundException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
 
         // POST api/<JobsController>
