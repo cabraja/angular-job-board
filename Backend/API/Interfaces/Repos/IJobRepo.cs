@@ -1,5 +1,6 @@
 ﻿using API.Helpers.DTO;
 using API.Helpers.QueryModels;
+using DataAccess.Auth;
 using DataAccess.Models;
 
 namespace API.Interfaces.Repos
@@ -9,7 +10,7 @@ namespace API.Interfaces.Repos
         public Task<List<SmallJobDTO>> GetJobsAsync(JobQueryModal queryModal);
         public Task<JobDTO> GetSingleJobAsync(int jobId);
         public Task<JobDTO> CreateJob(AddJobDTO addJobDTO);
-        public Task<JobDTO> UpdateJob(int JobId, EditJobDTO editJobDTO);
-        public Task<JobDTO> DeleteJob(int JobId);
+        public Task<JobDTO> UpdateJob(int JobId, EditJobDTO editJobDTO, AppUser appUser);
+        public Task<JobDTO> DeleteJob(int JobId, AppUser appUser);
     }
 }

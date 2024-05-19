@@ -3,7 +3,9 @@ using API.Helpers.Exceptions;
 using API.Helpers.QueryModels;
 using API.Interfaces.Repos;
 using DataAccess;
+using DataAccess.Auth;
 using DataAccess.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
@@ -13,10 +15,12 @@ namespace API.Repos
     public class JobRepo : IJobRepo
     {
         private ApiContext _context;
+        private UserManager<AppUser> _userManager;
 
-        public JobRepo(ApiContext context)
+        public JobRepo(ApiContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<List<SmallJobDTO>> GetJobsAsync(JobQueryModal queryModal)
@@ -125,13 +129,18 @@ namespace API.Repos
             };
         }
 
-        public async Task<JobDTO> UpdateJob(int jobId, EditJobDTO editJobDTO)
+        public async Task<JobDTO> UpdateJob(int jobId, EditJobDTO editJobDTO, AppUser appUser)
         {
             var job = await _context.Jobs.Include(x => x.Tags).Include(x => x.Employer).FirstOrDefaultAsync(x => x.Id == jobId);
 
             if(job == null )
             {
                 throw new EntityNotFoundException("This job does not exist.");
+            }
+
+            if(job.Employer.AppUserId != appUser.Id)
+            {
+                throw new NotEntityOwnerException("You are not the owner of this job post.");
             }
 
             if (!editJobDTO.Title.IsNullOrEmpty())
@@ -170,13 +179,18 @@ namespace API.Repos
             };
         }
 
-        public async Task<JobDTO> DeleteJob(int jobId)
+        public async Task<JobDTO> DeleteJob(int jobId, AppUser appUser)
         {
             var job = await _context.Jobs.Include(x => x.Tags).Include(x => x.Employer).FirstOrDefaultAsync(x => x.Id == jobId);
 
             if(job == null )
             {
                 throw new EntityNotFoundException("Job does not exist.");
+            }
+
+            if (job.Employer.AppUserId != appUser.Id)
+            {
+                throw new NotEntityOwnerException("You are not the owner of this job post.");
             }
 
             _context.Jobs.Remove(job);

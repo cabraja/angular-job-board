@@ -5,6 +5,7 @@ using DataAccess.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 
 namespace API.Controllers
 {
@@ -39,10 +40,12 @@ namespace API.Controllers
 
                 if(!result.Succeeded) return Unauthorized("Incorrect password.");
 
+                var role = await _userManager.GetRolesAsync(user);
+
                 return Ok(new NewUserDTO
                 {
                     Email = login.Email,
-                    Token = _tokenService.CreateToken(user)
+                    Token = _tokenService.CreateToken(user, role[0])
                 });
             }
             catch(Exception ex)
@@ -84,7 +87,7 @@ namespace API.Controllers
                         return Ok(new NewUserDTO
                         {
                             Email = appUser.Email,
-                            Token = _tokenService.CreateToken(appUser)
+                            Token = _tokenService.CreateToken(appUser, registerDTO.IsEmployer ? "Employer" : "Regular")
                         });
                     }
                     else
