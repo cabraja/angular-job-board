@@ -11,7 +11,11 @@ namespace API.Helpers.DTO.Auth
         [Required]
         public string? Password { get; set; }
 
-        public bool IsEmployer { get; set; } = false;
+    }
 
+    public class RegisterEmployerDTO : RegisterDTO
+    {
+        [Required]
+        public string? EmployerName { get; set; }
     }
 }

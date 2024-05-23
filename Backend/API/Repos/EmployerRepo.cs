@@ -56,5 +56,33 @@ namespace API.Repos
                 Jobs = employer.Jobs.Select(j => new PartialJobDTO { Id = j.Id, Title = j.Title, CreatedAt = j.CreatedAt }).ToList(),
             };
         }
+
+        public async Task<SmallEmployerDTO> CreateEmployerSimple(CreateEmployerDTO createDto)
+        {
+            if (createDto.EmployerName.IsNullOrEmpty())
+            {
+                throw new EntityNotFoundException("Employer name was not provided.");
+            }
+
+            if (createDto.AppUserId.IsNullOrEmpty())
+            {
+                throw new EntityNotFoundException("User ID was not provided.");
+            }
+
+            Employer employer = new Employer
+            {
+                Name = createDto.EmployerName,
+                AppUserId = createDto.AppUserId,
+            };
+
+            await _context.Employers.AddAsync(employer);
+            await _context.SaveChangesAsync();
+
+            return new EmployerDTO
+            {
+                Id = employer.Id,
+                Name = employer.Name,
+            };
+        }
     }
 }

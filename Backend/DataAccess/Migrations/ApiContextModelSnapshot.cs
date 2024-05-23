@@ -236,13 +236,13 @@ namespace DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b60621aa-bbf5-4046-96a0-0db9b73bce80",
+                            Id = "20b3d1eb-f251-4f7f-8d92-b8406b912622",
                             Name = "Employer",
                             NormalizedName = "EMPLOYER"
                         },
                         new
                         {
-                            Id = "533be840-fbbb-4d85-8406-7d29c54ab7e9",
+                            Id = "d0e013d2-5ad2-47ce-bf8a-06ce57050268",
                             Name = "Regular",
                             NormalizedName = "REGULAR"
                         });

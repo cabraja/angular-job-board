@@ -1,5 +1,7 @@
-﻿using API.Helpers.DTO.Auth;
+﻿using API.Helpers.DTO;
+using API.Helpers.DTO.Auth;
 using API.Interfaces.Auth;
+using API.Interfaces.Repos;
 using API.Services;
 using DataAccess.Auth;
 using Microsoft.AspNetCore.Identity;
@@ -16,12 +18,14 @@ namespace API.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmployerRepo _employerRepo;
 
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager)
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, IEmployerRepo employerRepo)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
+            _employerRepo = employerRepo;
         }
 
         // POST api/<AccountController>
@@ -72,22 +76,14 @@ namespace API.Controllers
 
                 if (createdUser.Succeeded)
                 {
-                    IdentityResult roleResult;
-                    if(registerDTO.IsEmployer)
-                    {
-                       roleResult = await _userManager.AddToRoleAsync(appUser, "Employer");
-                    }
-                    else
-                    {
-                        roleResult = await _userManager.AddToRoleAsync(appUser, "Regular");
-                    }
-
+                    IdentityResult roleResult = await _userManager.AddToRoleAsync(appUser, "Regular");
+                    
                     if(roleResult.Succeeded)
                     {
                         return Ok(new NewUserDTO
                         {
                             Email = appUser.Email,
-                            Token = _tokenService.CreateToken(appUser, registerDTO.IsEmployer ? "Employer" : "Regular")
+                            Token = _tokenService.CreateToken(appUser, "Regular")
                         });
                     }
                     else
@@ -97,10 +93,56 @@ namespace API.Controllers
                 }
                 else
                 {
-                    return StatusCode(500, createdUser.Errors);
+                    return StatusCode(400, createdUser.Errors);
                 }
             }
             catch(Exception ex)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        // POST api/<AccountController>
+        [HttpPost("register/employer")]
+        public async Task<IActionResult> RegisterEmployer([FromBody] RegisterEmployerDTO registerDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var appUser = new AppUser
+                {
+                    UserName = registerDTO.Email,
+                    Email = registerDTO.Email,
+
+                };
+                var createdUser = await _userManager.CreateAsync(appUser, registerDTO.Password);
+
+                if (createdUser.Succeeded)
+                {
+                    IdentityResult roleResult = await _userManager.AddToRoleAsync(appUser, "Employer");
+
+                    if (roleResult.Succeeded)
+                    {
+                        SmallEmployerDTO employer = await _employerRepo.CreateEmployerSimple(new CreateEmployerDTO { EmployerName = registerDTO.EmployerName, AppUserId = appUser.Id});
+
+                        return Ok(new NewUserDTO
+                        {
+                            Email = appUser.Email,
+                            Token = _tokenService.CreateToken(appUser, "Employer")
+                        });
+                    }
+                    else
+                    {
+                        return StatusCode(500, roleResult.Errors);
+                    }
+                }
+                else
+                {
+                    return StatusCode(400, createdUser.Errors);
+                }
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500);
             }

@@ -8,5 +8,6 @@ namespace API.Interfaces.Repos
     {
         public Task<List<SmallEmployerDTO>> GetEmployersAsync(EmployerQueryModel queryModel);
         public Task<EmployerDTO> GetSingleEmployerAsync(int id);
+        public Task<SmallEmployerDTO> CreateEmployerSimple(CreateEmployerDTO createDto);
     }
 }
