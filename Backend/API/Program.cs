@@ -49,6 +49,7 @@ builder.Services.AddSwaggerGen(option =>
 
 builder.Services.AddScoped<IEmployerRepo, EmployerRepo>();
 builder.Services.AddScoped<IJobRepo, JobRepo>();
+builder.Services.AddScoped<IRegularUserRepo, RegularUserRepo>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddDbContext<ApiContext>(options => {

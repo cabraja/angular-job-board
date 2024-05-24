@@ -2,7 +2,7 @@
 
 namespace API.Helpers.DTO.Auth
 {
-    public class RegisterDTO
+    public abstract class RegisterBaseDTO
     {
         [Required]
         [EmailAddress]
@@ -13,7 +13,13 @@ namespace API.Helpers.DTO.Auth
 
     }
 
-    public class RegisterEmployerDTO : RegisterDTO
+    public class RegisterDTO : RegisterBaseDTO
+    {
+        [Required]
+        public string? Username { get; set; }
+    }
+
+    public class RegisterEmployerDTO : RegisterBaseDTO
     {
         [Required]
         public string? EmployerName { get; set; }

@@ -1,5 +1,6 @@
 ﻿using API.Helpers.DTO;
 using API.Helpers.DTO.Auth;
+using API.Helpers.Exceptions;
 using API.Interfaces.Auth;
 using API.Interfaces.Repos;
 using API.Services;
@@ -19,13 +20,15 @@ namespace API.Controllers
         private readonly ITokenService _tokenService;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmployerRepo _employerRepo;
+        private readonly IRegularUserRepo _regularUserRepo;
 
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, IEmployerRepo employerRepo)
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, IEmployerRepo employerRepo, IRegularUserRepo regularUserRepo)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
             _employerRepo = employerRepo;
+            _regularUserRepo = regularUserRepo;
         }
 
         // POST api/<AccountController>
@@ -68,7 +71,7 @@ namespace API.Controllers
 
                 var appUser = new AppUser
                 {
-                    UserName = registerDTO.Email,
+                    UserName = registerDTO.Username,
                     Email = registerDTO.Email,
 
                 };
@@ -80,6 +83,8 @@ namespace API.Controllers
                     
                     if(roleResult.Succeeded)
                     {
+                        RegularUserSimpleDTO user = await _regularUserRepo.CreateRegularUser(new CreateRegularUserDTO { Username = registerDTO.Username, AppUserId = appUser.Id});
+
                         return Ok(new NewUserDTO
                         {
                             Email = appUser.Email,
@@ -95,6 +100,14 @@ namespace API.Controllers
                 {
                     return StatusCode(400, createdUser.Errors);
                 }
+            }
+            catch(InputValidationException ex)
+            {
+                return StatusCode(400, ex.Message);
+            }
+            catch(NameTakenException ex)
+            {
+                return StatusCode(400, ex.Message);
             }
             catch(Exception ex)
             {
@@ -112,7 +125,7 @@ namespace API.Controllers
 
                 var appUser = new AppUser
                 {
-                    UserName = registerDTO.Email,
+                    UserName = registerDTO.EmployerName,
                     Email = registerDTO.Email,
 
                 };
@@ -141,6 +154,14 @@ namespace API.Controllers
                 {
                     return StatusCode(400, createdUser.Errors);
                 }
+            }
+            catch (InputValidationException ex)
+            {
+                return StatusCode(400, ex.Message);
+            }
+            catch (NameTakenException ex)
+            {
+                return StatusCode(400, ex.Message);
             }
             catch (Exception ex)
             {

@@ -61,12 +61,17 @@ namespace API.Repos
         {
             if (createDto.EmployerName.IsNullOrEmpty())
             {
-                throw new EntityNotFoundException("Employer name was not provided.");
+                throw new InputValidationException("Employer name was not provided.");
             }
 
             if (createDto.AppUserId.IsNullOrEmpty())
             {
-                throw new EntityNotFoundException("User ID was not provided.");
+                throw new InputValidationException("User ID was not provided.");
+            }
+
+            if(await _context.Employers.AnyAsync(x => x.Name.ToLower() == createDto.EmployerName.ToLower()))
+            {
+                throw new NameTakenException("An employer with this name already exists.");
             }
 
             Employer employer = new Employer
