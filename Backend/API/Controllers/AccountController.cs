@@ -125,7 +125,7 @@ namespace API.Controllers
 
                 var appUser = new AppUser
                 {
-                    UserName = registerDTO.EmployerName,
+                    UserName = registerDTO.Email,
                     Email = registerDTO.Email,
 
                 };

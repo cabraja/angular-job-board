@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using API.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,12 +54,15 @@ builder.Services.AddScoped<IJobRepo, JobRepo>();
 builder.Services.AddScoped<IRegularUserRepo, RegularUserRepo>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+builder.Services.RegisterValidators();
+
 builder.Services.AddDbContext<ApiContext>(options => {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Azure"));
 });
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
+    options.User.RequireUniqueEmail = true;
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireUppercase = false;
