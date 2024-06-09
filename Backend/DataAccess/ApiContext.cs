@@ -41,5 +41,6 @@ namespace DataAccess
         public DbSet<Employer> Employers { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<RegularUser> RegularUsers { get; set; }
+        public DbSet<RegularUserJob> RegularUserJobs { get; set; }
     }
 }

@@ -12,5 +12,6 @@ namespace DataAccess.Models
         public string Description { get; set; } = string.Empty;
         public Employer Employer { get; set; }
         public List<Tag> Tags { get; set; } = new List<Tag>();
+        public List<RegularUserJob> Followers { get; set; } = new List<RegularUserJob>();
     }
 }

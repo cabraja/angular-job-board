@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20240524223737_add-regular-user")]
-    partial class addregularuser
+    [Migration("20240609211306_init2")]
+    partial class init2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -155,9 +155,6 @@ namespace DataAccess.Migrations
                     b.Property<int>("EmployerId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RegularUserId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(40)
@@ -166,8 +163,6 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EmployerId");
-
-                    b.HasIndex("RegularUserId");
 
                     b.ToTable("Jobs");
                 });
@@ -199,6 +194,26 @@ namespace DataAccess.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("RegularUsers");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.RegularUserJob", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("JobId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("UserId", "JobId");
+
+                    b.HasIndex("JobId");
+
+                    b.ToTable("RegularUserJobs");
                 });
 
             modelBuilder.Entity("DataAccess.Models.Tag", b =>
@@ -273,13 +288,13 @@ namespace DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c1f27401-9eaa-4a37-a021-e51f629ac24c",
+                            Id = "6902f993-647b-44c7-9593-8c2026a26f6e",
                             Name = "Employer",
                             NormalizedName = "EMPLOYER"
                         },
                         new
                         {
-                            Id = "c2c3842f-86d4-452f-8cbc-598458cfff24",
+                            Id = "5fd0f85f-ccc6-4667-bb42-ca0f6a2387b8",
                             Name = "Regular",
                             NormalizedName = "REGULAR"
                         });
@@ -410,10 +425,6 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataAccess.Models.RegularUser", null)
-                        .WithMany("FavoriteJobs")
-                        .HasForeignKey("RegularUserId");
-
                     b.Navigation("Employer");
                 });
 
@@ -426,6 +437,25 @@ namespace DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.RegularUserJob", b =>
+                {
+                    b.HasOne("DataAccess.Models.Job", "Job")
+                        .WithMany("Followers")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Models.RegularUser", "User")
+                        .WithMany("FavoriteJobs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JobTag", b =>
@@ -497,6 +527,11 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.Models.Employer", b =>
                 {
                     b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.Job", b =>
+                {
+                    b.Navigation("Followers");
                 });
 
             modelBuilder.Entity("DataAccess.Models.RegularUser", b =>

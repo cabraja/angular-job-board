@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -199,6 +199,27 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RegularUsers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Username = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RegularUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RegularUsers_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Jobs",
                 columns: table => new
                 {
@@ -244,13 +265,36 @@ namespace DataAccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RegularUserJob",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    JobId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RegularUserJob", x => new { x.UserId, x.JobId });
+                    table.ForeignKey(
+                        name: "FK_RegularUserJob_Jobs_JobId",
+                        column: x => x.JobId,
+                        principalTable: "Jobs",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_RegularUserJob_RegularUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "RegularUsers",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "20b3d1eb-f251-4f7f-8d92-b8406b912622", null, "Employer", "EMPLOYER" },
-                    { "d0e013d2-5ad2-47ce-bf8a-06ce57050268", null, "Regular", "REGULAR" }
+                    { "49e70972-22c8-441d-8499-068bc5162612", null, "Regular", "REGULAR" },
+                    { "f760254a-c2f6-4b8b-8240-7e76c5a92b06", null, "Employer", "EMPLOYER" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -306,6 +350,16 @@ namespace DataAccess.Migrations
                 name: "IX_JobTag_TagsId",
                 table: "JobTag",
                 column: "TagsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RegularUserJob_JobId",
+                table: "RegularUserJob",
+                column: "JobId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RegularUsers_AppUserId",
+                table: "RegularUsers",
+                column: "AppUserId");
         }
 
         /// <inheritdoc />
@@ -330,13 +384,19 @@ namespace DataAccess.Migrations
                 name: "JobTag");
 
             migrationBuilder.DropTable(
+                name: "RegularUserJob");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Jobs");
 
             migrationBuilder.DropTable(
-                name: "Tags");
+                name: "RegularUsers");
 
             migrationBuilder.DropTable(
                 name: "Employers");

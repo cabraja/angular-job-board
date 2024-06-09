@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20240522234455_init")]
-    partial class init
+    [Migration("20240609211200_init1")]
+    partial class init1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,6 +167,55 @@ namespace DataAccess.Migrations
                     b.ToTable("Jobs");
                 });
 
+            modelBuilder.Entity("DataAccess.Models.RegularUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("RegularUsers");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.RegularUserJob", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("JobId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("UserId", "JobId");
+
+                    b.HasIndex("JobId");
+
+                    b.ToTable("RegularUserJob");
+                });
+
             modelBuilder.Entity("DataAccess.Models.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -239,13 +288,13 @@ namespace DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "20b3d1eb-f251-4f7f-8d92-b8406b912622",
+                            Id = "f760254a-c2f6-4b8b-8240-7e76c5a92b06",
                             Name = "Employer",
                             NormalizedName = "EMPLOYER"
                         },
                         new
                         {
-                            Id = "d0e013d2-5ad2-47ce-bf8a-06ce57050268",
+                            Id = "49e70972-22c8-441d-8499-068bc5162612",
                             Name = "Regular",
                             NormalizedName = "REGULAR"
                         });
@@ -379,6 +428,36 @@ namespace DataAccess.Migrations
                     b.Navigation("Employer");
                 });
 
+            modelBuilder.Entity("DataAccess.Models.RegularUser", b =>
+                {
+                    b.HasOne("DataAccess.Auth.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.RegularUserJob", b =>
+                {
+                    b.HasOne("DataAccess.Models.Job", "Job")
+                        .WithMany("Followers")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Models.RegularUser", "User")
+                        .WithMany("FavoriteJobs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("JobTag", b =>
                 {
                     b.HasOne("DataAccess.Models.Job", null)
@@ -448,6 +527,16 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.Models.Employer", b =>
                 {
                     b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.Job", b =>
+                {
+                    b.Navigation("Followers");
+                });
+
+            modelBuilder.Entity("DataAccess.Models.RegularUser", b =>
+                {
+                    b.Navigation("FavoriteJobs");
                 });
 #pragma warning restore 612, 618
         }

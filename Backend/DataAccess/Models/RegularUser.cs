@@ -12,6 +12,6 @@ namespace DataAccess.Models
         public string Username { get; set; }
         public string AppUserId { get; set; }
         public AppUser AppUser { get; set; }
-        public List<Job> FavoriteJobs { get; set; } = new List<Job>();
+        public List<RegularUserJob> FavoriteJobs { get; set; } = new List<RegularUserJob>();
     }
 }

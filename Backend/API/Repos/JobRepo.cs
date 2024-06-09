@@ -193,6 +193,10 @@ namespace API.Repos
                 throw new NotEntityOwnerException("You are not the owner of this job post.");
             }
 
+            // REMOVE FAVORITE JOBS BEFORE DELETING A JOB
+            var favJobs = await _context.RegularUserJobs.Where(x => x.JobId == job.Id).ToListAsync();
+            _context.RemoveRange(favJobs);
+
             _context.Jobs.Remove(job);
             await _context.SaveChangesAsync();
             return new JobDTO
