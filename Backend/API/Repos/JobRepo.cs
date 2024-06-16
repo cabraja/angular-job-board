@@ -216,5 +216,34 @@ namespace API.Repos
                 })
             };
         }
+
+        public async Task<List<SmallJobDTO>> GetFavoriteJobsAsync(PaginatedQueryModal queryModal, AppUser appUser)
+        {
+            var user = _context.RegularUsers.FirstOrDefault(x => x.AppUserId == appUser.Id);
+
+            if(user == null)
+            {
+                throw new EntityNotFoundException("This user does not exist.");
+            }
+
+            var jobs = _context.Jobs.Include(x => x.Employer).Include(x => x.Tags).Include(x => x.Followers).Where(x => x.Followers.Any(f => f.UserId == user.Id)).AsQueryable();
+
+            return await jobs.Skip(queryModal.PerPage * (queryModal.Page - 1)).Take(queryModal.PerPage).Select(x => new SmallJobDTO
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Employer = new EmployerPartialDTO
+                {
+                    Name = x.Employer.Name,
+                    Id = x.Employer.Id,
+                },
+                Tags = x.Tags.Select(t => new TagPartialDTO
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                }).ToList(),
+
+            }).ToListAsync();
+        }
     }
 }

@@ -12,5 +12,6 @@ namespace API.Interfaces.Repos
         public Task<JobDTO> CreateJob(AddJobDTO addJobDTO);
         public Task<JobDTO> UpdateJob(int JobId, EditJobDTO editJobDTO, AppUser appUser);
         public Task<JobDTO> DeleteJob(int JobId, AppUser appUser);
+        public Task<List<SmallJobDTO>> GetFavoriteJobsAsync(PaginatedQueryModal queryModal, AppUser appUser);
     }
 }

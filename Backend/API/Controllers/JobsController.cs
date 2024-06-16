@@ -145,5 +145,32 @@ namespace API.Controllers
                 return StatusCode(500);
             }
         }
+
+        // GET api/<JobsController>/favorite
+        [HttpGet("favorite")]
+        [Authorize(Roles = "Regular")]
+        public async Task<IActionResult> GetFavorites([FromQuery] PaginatedQueryModal queryModal)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var appUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                if (appUser == null)
+                {
+                    return BadRequest("User not found.");
+                }
+                var jobs = await _repo.GetFavoriteJobsAsync(queryModal, appUser);
+                return Ok(jobs);
+            }
+            catch (EntityNotFoundException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
+        }
     }
 }
