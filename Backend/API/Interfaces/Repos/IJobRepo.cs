@@ -13,5 +13,7 @@ namespace API.Interfaces.Repos
         public Task<JobDTO> UpdateJob(int JobId, EditJobDTO editJobDTO, AppUser appUser);
         public Task<JobDTO> DeleteJob(int JobId, AppUser appUser);
         public Task<List<SmallJobDTO>> GetFavoriteJobsAsync(PaginatedQueryModal queryModal, AppUser appUser);
+        public Task<JobDTO> AddToFavorite(int jobId, AppUser appUser);
+        public Task<JobDTO> RemoveFromFavorite(int jobId, AppUser appUser);
     }
 }

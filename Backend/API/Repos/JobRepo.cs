@@ -245,5 +245,91 @@ namespace API.Repos
 
             }).ToListAsync();
         }
+
+        public async Task<JobDTO> AddToFavorite(int jobId, AppUser appUser)
+        {
+            var job = await _context.Jobs.Include(x => x.Followers).Include(x => x.Tags).Include(x => x.Employer).FirstOrDefaultAsync(x => x.Id == jobId);
+
+            if(job == null)
+            {
+                throw new EntityNotFoundException("Job does not exist.");
+            }
+
+            var user = await _context.RegularUsers.FirstOrDefaultAsync(x => x.AppUserId == appUser.Id);
+
+            if(user == null) 
+            {
+                throw new EntityNotFoundException("This user does not exist.");
+            }
+
+            if(job.Followers.Any(x => x.UserId == user.Id))
+            {
+                throw new FavoriteException("This job is already in your favorites.");
+            }
+
+            job.Followers.Add(new RegularUserJob { UserId = user.Id, JobId = jobId });
+            await _context.SaveChangesAsync();
+
+            return new JobDTO
+            {
+                Id = job.Id,
+                Title = job.Title,
+                Description = job.Description,
+                Employer = new EmployerPartialDTO
+                {
+                    Id = job.Employer.Id,
+                    Name = job.Employer.Name,
+                },
+                Tags = job.Tags.Select(t => new TagPartialDTO
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                })
+            };
+        }
+
+        public async Task<JobDTO> RemoveFromFavorite(int jobId, AppUser appUser)
+        {
+            var job = await _context.Jobs.Include(x => x.Followers).Include(x => x.Tags).Include(x => x.Employer).FirstOrDefaultAsync(x => x.Id == jobId);
+
+            if (job == null)
+            {
+                throw new EntityNotFoundException("Job does not exist.");
+            }
+
+            var user = await _context.RegularUsers.FirstOrDefaultAsync(x => x.AppUserId == appUser.Id);
+
+            if (user == null)
+            {
+                throw new EntityNotFoundException("This user does not exist.");
+            }
+
+            var regularUserJob = job.Followers.FirstOrDefault(x => x.UserId == user.Id);
+
+            if (regularUserJob == null)
+            {
+                throw new FavoriteException("This job is not in your favorites.");
+            }
+
+            job.Followers.Remove(regularUserJob);
+            await _context.SaveChangesAsync();
+
+            return new JobDTO
+            {
+                Id = job.Id,
+                Title = job.Title,
+                Description = job.Description,
+                Employer = new EmployerPartialDTO
+                {
+                    Id = job.Employer.Id,
+                    Name = job.Employer.Name,
+                },
+                Tags = job.Tags.Select(t => new TagPartialDTO
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                })
+            };
+        }
     }
 }

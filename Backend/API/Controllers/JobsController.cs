@@ -167,6 +167,72 @@ namespace API.Controllers
             {
                 return UnprocessableEntity(ex.Message);
             }
+            catch (FavoriteException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        //POST api/<JobsController>/favorite
+        [HttpPost("favorite/{id}")]
+        [Authorize(Roles = "Regular")]
+        public async Task<IActionResult> AddToFavorite(int id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var appUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                if (appUser == null)
+                {
+                    return BadRequest("User not found.");
+                }
+                var job = await _repo.AddToFavorite(id, appUser);
+                return StatusCode(201, job);
+            }
+            catch (EntityNotFoundException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
+            catch (FavoriteException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        //DELETE api/<JobsController>/favorite
+        [HttpDelete("favorite/{id}")]
+        [Authorize(Roles = "Regular")]
+        public async Task<IActionResult> DeleteFromFavorite(int id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var appUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                if (appUser == null)
+                {
+                    return BadRequest("User not found.");
+                }
+                var job = await _repo.RemoveFromFavorite(id, appUser);
+                return Ok(job);
+            }
+            catch (EntityNotFoundException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
+            catch (FavoriteException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 return StatusCode(500);
